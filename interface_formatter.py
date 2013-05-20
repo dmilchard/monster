@@ -10,7 +10,6 @@ class Interface_Formatter():
 			'00EMPLOYEE': {
 				'new_employee': (6, 'Y')},
 			'10PERDET': {
-				'TEST': (1, self.say_hi, 3),
 				'surname': (7, 2),
 				'first_forename': (8, 1),
 				'title': (11, 6),
@@ -50,10 +49,6 @@ class Interface_Formatter():
 					except:
 						print('number\n')
 
-		return
-
-	def say_hi(self, num):
-		print('Hi! %d\n' % num)
 		return
 
 
