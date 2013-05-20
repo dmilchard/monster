@@ -10,7 +10,6 @@ class Interface_Formatter():
 			'00EMPLOYEE': {
 				'new_employee': (6, -1)},
 			'10PERDET': {
-<<<<<<< HEAD
 				'surname': (7, -1),
 				'first_forename': (8, -1),
 				'other_forenames': (9, -1),
@@ -60,12 +59,6 @@ class Interface_Formatter():
 				'original_start_date': (11, -1),
 				'original_start_reason': (12, -1),
 				'probation_date': (13, -1)}
-=======
-				'surname': (7, 2),
-				'first_forename': (8, 1),
-				'title': (11, 6),
-				'dob': (13, 7)}
->>>>>>> 96027bac0f9e6c0a01871275e9d8c04e78ff9b65
 			}
 
 	def run(self):
