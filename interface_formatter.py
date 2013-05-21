@@ -67,35 +67,48 @@ class Interface_Formatter():
 			transaction_id = 1
 			for row in reader:
 				transaction = self.get_lines(row, transaction_id)
-				print(transaction)
+				
+				#
+				# Code to write all lines to csv...
+				#
+
 				transaction_id += 1
 
 	def get_lines(self, row, transaction_id):
 		"""Walks through the position map dictionaries to get the indexes of the
 			associated fields in the TMS output row, the literal value to be inserted,
 			or the function to be run on the field value in the TMS file"""
+
 		lines = []
 		for record_type in self.position_map.keys():
 			line = [record_type, transaction_id]
 
+			position = 2
 			for field in self.position_map[record_type].keys():
 				params = self.position_map[record_type][field]
 				
+				# Add empty strings to the list until the position is reached.
+				while position < params[0]:
+					line.append('')
+
 				# Duck tests for the type of the paramater.
 				# If it's a function, call it with the value from the third argument:
 				if callable(params[1]):
-					params[1](row[params[2]])
+					line.append(params[1](row[params[2]]))
 				else:
-					# Duck test for string object:
+					# Duck test for string object. If found, insert string value.
 					try:
 						params[1].islower()
-						print('string\n')
+						line.append(params[1])
 
-					# Object must be an index:
-					except:
-						print('number\n')
+					# Object must be an index.
+					except AttributeError:
+						# List is 0-based so minus 1 from position.
+						line.append(row[params[1] - 1])
 
-		return
+			lines.append(line)
+
+		return lines
 
 
 if __name__ == '__main__':
