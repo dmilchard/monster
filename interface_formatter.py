@@ -3,16 +3,17 @@ import sys
 
 class Interface_Formatter():
 
-    def __init__(self, input_file, output_dir, log_file):
+    def __init__(self, input_file, output_file, log_file):
         self.input_file = input_file
-        self.output_dir = output_dir
+        self.output_file = output_file
 
         #  [ (rec_type, (name, position, action, field), ...), ... ]
         self.position_map = [('00EMPLOYEE',
                               ('new_employee', 6, 'Y')),
                              ('10PERDET',
                               ('surname', 7, 1),
-                              ('first_rorename', 8, 0))]
+                              ('first_forename', 8, 0),
+                              ('dob', 13, self.format_date, 2))]
 
 ##      self.position_map = {
 ##          '00EMPLOYEE': {
@@ -70,23 +71,24 @@ class Interface_Formatter():
 ##          }
 
     def run(self):
-        with open(self.input_file, 'r') as csvfile:
-            reader = csv.reader(csvfile)
+
+        # Monster source file:
+        with open(self.input_file, 'r') as input_file:
+            reader = csv.reader(input_file)
             transaction_id = 1
-            for row in reader:
-                transaction = self.get_lines(row, transaction_id)
-                
-                #
-                # Add to write all lines to csv.
-                #
-                #
-                # Debug output:
-                for line in transaction:
-                    print(line)
-                #
-                #
-                #
-                transaction_id += 1
+
+            # Output file formatted for RL:
+            with open(self.output_file, 'wb') as output_file:
+                writer = csv.writer(output_file)
+
+                # Transform each row in the Monster file into the format
+                # required by RL and write to the output file.
+                for row in reader:
+
+                    for line in self.get_lines(row, transaction_id):
+                        writer.writerow(line)
+
+                    transaction_id += 1
 
     def get_lines(self, row, transaction_id = ''):
 
@@ -100,15 +102,15 @@ class Interface_Formatter():
 
             # Subsequent elements in each tuple hold the details about how to
             # output the field.
+            # field[0] holds the field name (refernce only).
+            # field[1] holds the position in the output file.
+            # field[2] holds the action.
+            # field[3:] holds the remaining parameters (if any)
             position = 2
             for field in record[1:]:
 
                 # Add empty strings to the list until the position is
                 # reached.
-                # element[0] holds the field name (refernce only).
-                # element[1] holds the position in the output file.
-                # element[2] holds the action.
-                # element[3:] holds the remaining parameters (if any)
                 while position < field[1] - 1:
                     line.append('')
                     position += 1
@@ -117,7 +119,7 @@ class Interface_Formatter():
                 # If it's a function, call it with the value from the
                 # third argument:
                 if callable(field[2]):
-                    line.append(field[2](row[field[3:]]))
+                    line.append(field[2](row[field[3]]))
                 else:
                     # If it's a string, add the value.
                     try:
@@ -130,10 +132,16 @@ class Interface_Formatter():
                     except AttributeError:
                         line.append(row[field[2]])
 
+                position += 1
+
             # Add the complete line to the return list.
             lines.append(line)
 
         return lines
+
+    def format_date(self, date):
+        """ Removes slashes from a date string"""
+        return date[:2] + date[3:5] + date[6:]
 
 
 if __name__ == '__main__':
@@ -141,6 +149,6 @@ if __name__ == '__main__':
         sys.stderr.write('Usage: format_file <input_file> <output_dir> <log_file>\n')
         sys.exit(1)
 
-    input_file, output_dir, log_file = sys.argv[1:]
-    formatter = Interface_Formatter(input_file, output_dir, log_file)
+    input_file, output_file, log_file = sys.argv[1:]
+    formatter = Interface_Formatter(input_file, output_file, log_file)
     formatter.run()
