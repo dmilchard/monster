@@ -7,7 +7,7 @@ class Interface_Formatter():
         self.input_file = input_file
         self.output_file = output_file
 
-        #  [ (rec_type, (name, position, action, field), ...), ... ]
+        #  [ (rec_type, (name, position, action, field), ... ), ... ) ]
         self.position_map = [('00EMPLOYEE',
                               ('new_employee', 6, 'Y')),
                              ('10PERDET',
@@ -72,52 +72,50 @@ class Interface_Formatter():
 
     def run(self):
 
-        # Monster source file:
+        # TMS source file:
         with open(self.input_file, 'r') as input_file:
             reader = csv.reader(input_file)
-            transaction_id = 1
 
             # Output file formatted for RL:
             with open(self.output_file, 'wb') as output_file:
                 writer = csv.writer(output_file)
 
-                # Transform each row in the Monster file into the format
+                # Transform each row in the TMS file into the format
                 # required by RL and write to the output file.
                 for row in reader:
 
-                    for line in self.get_lines(row, transaction_id):
+                    for line in self.get_lines(row):
                         writer.writerow(line)
-
-                    transaction_id += 1
 
     def get_lines(self, row, transaction_id = ''):
 
         lines = []
 
-        # Each list item in the array represents a line to be output.
+        # Each list item in the array is a tuple representing a line to be
+        # output.
         for record in self.position_map:
 
-            # The first element of each tuple in the list is the record type.
+            # The first element of each tuple is the record type.
             line = [record[0], transaction_id]
 
-            # Subsequent elements in each tuple hold the details about how to
-            # output the field.
-            # field[0] holds the field name (refernce only).
+            # The second element is another tuple that holds information on
+            # what to output:
+            # field[0] holds the field name (documentation purposes).
             # field[1] holds the position in the output file.
-            # field[2] holds the action.
-            # field[3:] holds the remaining parameters (if any)
+            # field[2] holds the function / value / field ref.
+            # field[3] holds the field ref to pass to the function (if any).
             position = 2
             for field in record[1:]:
 
                 # Add empty strings to the list until the position is
-                # reached.
+                # reached. -1 used as RL positions start at 1 not 0.
                 while position < field[1] - 1:
                     line.append('')
                     position += 1
 
-                # Duck tests for the type of the paramater.
+                # Duck test for the type of the paramater.
                 # If it's a function, call it with the value from the
-                # third argument:
+                # field ref represented by the forth element:
                 if callable(field[2]):
                     line.append(field[2](row[field[3]]))
                 else:
@@ -146,7 +144,7 @@ class Interface_Formatter():
 
 if __name__ == '__main__':
     if len(sys.argv) != 4:
-        sys.stderr.write('Usage: format_file <input_file> <output_dir> <log_file>\n')
+        sys.stderr.write('Usage: format_file <input_file> <output_file> <log_file>\n')
         sys.exit(1)
 
     input_file, output_file, log_file = sys.argv[1:]
