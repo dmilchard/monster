@@ -9,10 +9,10 @@ class Interface_Formatter():
 
         #  [ (rec_type, (name, position, action, field), ...), ... ]
         self.position_map = [('00EMPLOYEE',
-                              ('new_employee', 6, -1)),
+                              ('new_employee', 6, 'Y')),
                              ('10PERDET',
-                              ('surname', 7, -1),
-                              ('first_rorename', 8, -1))]
+                              ('surname', 7, 1),
+                              ('first_rorename', 8, 0))]
 
 ##      self.position_map = {
 ##          '00EMPLOYEE': {
@@ -86,13 +86,12 @@ class Interface_Formatter():
                 #
                 #
                 #
-
                 transaction_id += 1
 
     def get_lines(self, row, transaction_id = ''):
-                
+
         lines = []
-        
+
         # Each list item in the array represents a line to be output.
         for record in self.position_map:
 
@@ -101,41 +100,38 @@ class Interface_Formatter():
 
             # Subsequent elements in each tuple hold the details about how to
             # output the field.
+            position = 2
             for field in record[1:]:
 
-                # Loop through the elements in the tuple to determine what to
-                # do with each. Fields must appear in order.
-                position = 2
-                for element in field:
+                # Add empty strings to the list until the position is
+                # reached.
+                # element[0] holds the field name (refernce only).
+                # element[1] holds the position in the output file.
+                # element[2] holds the action.
+                # element[3:] holds the remaining parameters (if any)
+                while position < field[1] - 1:
+                    line.append('')
+                    position += 1
 
-                    # Add empty strings to the list until the position is
-                    # reached.
-                    # element[0] holds the field name (refernce only).
-                    # element[1] holds the position in the output file.
-                    # element[2] holds the action.
-                    # element[3:] holds the remaining parameters (if any)
-                    while position < element[1]:
-                        line.append('')
+                # Duck tests for the type of the paramater.
+                # If it's a function, call it with the value from the
+                # third argument:
+                if callable(field[2]):
+                    line.append(field[2](row[field[3:]]))
+                else:
+                    # If it's a string, add the value.
+                    try:
+                        field[2].islower()
+                        line.append(field[2])
 
-                    # Duck tests for the type of the paramater.
-                    # If it's a function, call it with the value from the
-                    # third argument:
-                    if callable(element[2]):
-                        line.append(element[2](row[element[3:]]))
-                    else:
-                        # If it's a string, add the value.
-                        try:
-                            element[2].islower()
-                            line.append(element[2])
+                    # If not a string or a function it must be a number so
+                    # use this as the position of the value in the monster
+                    # file.
+                    except AttributeError:
+                        line.append(row[field[2]])
 
-                        # If not a string or a function it must be a number so
-                        # use this as the position of the value in the monster
-                        # file.
-                        except AttributeError:
-                            line.append(row[element[2]])
-
-                # Add the complete line to the return list.
-                lines.append(line)
+            # Add the complete line to the return list.
+            lines.append(line)
 
         return lines
 
