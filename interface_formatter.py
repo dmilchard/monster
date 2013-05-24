@@ -7,68 +7,71 @@ class Interface_Formatter():
         self.input_file = input_file
         self.output_file = output_file
 
-        #  [ (rec_type, (name, position, action, field), ... ), ... ) ]
-        self.position_map = [('00EMPLOYEE',
+        # [ (rec_type, (name, position, action, field), ... ), ... ) ]
+        #
+        # Each tuple within the map represents a line to be written to the csv
+        # file. Within each the first element is the record type, and the second
+        # is another tuple holding:
+        #    - field name (for documentation purposes);
+        #    - position in the line to put the value;
+        #    - literal value to enter / position to find the value in the TMS
+        #      data / function to run on the value from the TMS data;
+        #    - if a function is provided, the position to find the value in the
+        #      TMS file that should be passed to the function.
+        self.position_map = (('00EMPLOYEE',
                               ('new_employee', 6, 'Y')),
                              ('10PERDET',
                               ('surname', 7, 1),
                               ('first_forename', 8, 0),
-                              ('dob', 13, self.format_date, 2))]
-
-##      self.position_map = {
-##          '00EMPLOYEE': {
-##              'new_employee': (6, -1)},
-##          '10PERDET': {
-##              'surname': (7, -1),
-##              'first_forename': (8, -1),
-##              'other_forenames': (9, -1),
-##              'title': (10, -1),
-##              'gender': (11, -1),
-##              'known_as_forename': (12, -1),
-##              'dob': (13, -1),
-##              'nino': (14, -1),
-##              'email': (18, -1),
-##              'address_1': (19, -1),
-##              'address_2': (20, -1),
-##              'address_3': (21, -1),
-##              'address_4': (22, -1),
-##              'country': (25, -1),
-##              'post_code': (26, -1),
-##              'home_tel': (27, -1),
-##              'mobile_tel': (29, -1),
-##              'passport_no': (42, -1),
-##              'passport_country': (43, -1),
-##              'passport_expiry': (44, -1)},
-##          '15ADDDET': {
-##              'nationality': (6, -1),
-##              'ethnic_origin': (7, -1),
-##              'country_of_birth': (8, -1),
-##              'notice_period': (18, -1),
-##              'religion': (22, -1),
-##              'sexual_orientation': (23, -1)},
-##          '20RELATION': {
-##              'rel_surname': (8, -1),
-##              'rel_first_forename': (9, -1),
-##              'rel_title': (11, -1),
-##              'rel_address_1': (16, -1),
-##              'rel_address_2': (17, -1),
-##              'rel_address_3': (18, -1),
-##              'rel_address_4': (19, -1),
-##              'rel_post_code': (23, -1),
-##              'rel_home_tel': (24, -1),
-##              'rel_work_tel': (25, -1),
-##              'rel_mobile_tel': (26, -1)},
-##          '30BANK': {
-##              'pay_method': (7, -1)},
-##          '35EMPBASIC': {
-##              'current_start_date': (6, -1).
-##              'current_start_reason': (7, -1),
-##              'suspended_indicator': (9, -1),
-##              'employee_type': (10, -1),
-##              'original_start_date': (11, -1),
-##              'original_start_reason': (12, -1),
-##              'probation_date': (13, -1)}
-##          }
+                              ('surname', 7, -1),
+                              ('first_forename', 8, -1),
+                              ('other_forenames', 9, -1),
+                              ('title', 10, -1),
+                              ('gender', 11, -1),
+                              ('known_as_forename', 12, -1),
+                              ('dob', 13, -1),
+                              ('nino', 14, -1),
+                              ('email', 18, -1),
+                              ('address_1', 19, -1),
+                              ('address_2', 20, -1),
+                              ('address_3', 21, -1),
+                              ('address_4', 22, -1),
+                              ('country', 25, -1),
+                              ('post_code', 26, -1),
+                              ('home_tel', 27, -1),
+                              ('mobile_tel', 29, -1),
+                              ('passport_no', 42, -1),
+                              ('passport_country', 43, -1),
+                              ('passport_expiry', 44, -1)),
+                             ('15ADDDET',
+                              ('nationality', 6, -1),
+                              ('ethnic_origin', 7, -1),
+                              ('country_of_birth', 8, -1),
+                              ('notice_period', 18, -1),
+                              ('religion', 22, -1),
+                              ('sexual_orientation', 23, -1)),
+                             ('20RELATION',
+                              ('rel_surname', 8, -1),
+                              ('rel_first_forename', 9, -1),
+                              ('rel_title', 11, -1),
+                              ('rel_address_1', 16, -1),
+                              ('rel_address_2', 17, -1),
+                              ('rel_address_3', 18, -1),
+                              ('rel_address_4', 19, -1),
+                              ('rel_post_code', 23, -1),
+                              ('rel_home_tel', 24, -1),
+                              ('rel_work_tel', 25, -1),
+                              ('rel_mobile_tel', 26, -1)),
+                             ('30BANK',
+                              ('pay_method', 7, -1)),
+                             ('35EMPBASIC',
+                              ('current_start_date', 6, -1),
+                              ('current_start_reason', 7, -1),
+                              ('suspended_indicator', 9, -1),
+                              ('employee_type', 10, -1),
+                              ('original_start_date', 11, -1),
+                              ('original_start_reason', 12, -1),
+                              ('probation_date', 13, -1)))
 
     def run(self):
 
