@@ -21,7 +21,7 @@ class InterfaceFormatter():
         self.output_file = output_file
         self.log_file = log_file
 
-        # [ (rec_type, (name, position, action, field1, ...), ... ), ... ) ]
+        # [ (rec_type, (name, position, action, field1, ... ), ... ), ... ) ]
         #
         # Each tuple within the map represents a line to be written to the csv
         # file. Within each the first element is the record type, and the
@@ -31,7 +31,7 @@ class InterfaceFormatter():
         #    - literal value to enter / position to find the value in the TMS
         #      data / function to run on the value from the TMS data;
         #    - (if a function is provided) the list of positions to find the
-        #      value in the TMS file that should be passed to the function.
+        #      values in the TMS file that should be passed to the function.
         self.position_map = (('00EMPLOYEE',
                               ('new_employee', 6, 'Y')),
                              ('10PERDET',
@@ -116,7 +116,7 @@ class InterfaceFormatter():
             # field[0] holds the field name (documentation purposes).
             # field[1] holds the position in the output file.
             # field[2] holds the function / value / field ref.
-            # field[3] holds the field ref to pass to the function (if any).
+            # field[3] holds the field refs to pass to the function (if any).
             position = 2
             for field in record[1:]:
 
