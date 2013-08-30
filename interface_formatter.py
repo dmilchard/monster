@@ -36,32 +36,31 @@ class InterfaceFormatter():
                               ('new_employee', 6, 'Y')),
                              ('10PERDET',
                               ('surname', 7, 1),
-                              ('first_forename', 8, 0),
-                              ('other_forenames', 9, None),
-                              ('title', 10, None),
-                              ('gender', 11, None),
-                              ('known_as_forename', 12, None),
-                              ('dob', 13, None),
+                              ('first_forename', 8, 3),
+                              ('other_forenames', 9, 4),
+                              ('title', 10, 2),
+                              ('gender', 11, get_gender, 2),
+                              ('known_as_forename', 12, 3),
+                              ('dob', 13, format_date, 5),
                               ('nino', 14, None),
-                              ('email', 18, None),
+                              ('email', 18, 15),
                               ('address_1', 19, None),
                               ('address_2', 20, None),
                               ('address_3', 21, None),
                               ('address_4', 22, None),
                               ('country', 25, None),
                               ('post_code', 26, None),
-                              ('home_tel', 27, None),
+                              ('home_tel', 27, 14),
                               ('mobile_tel', 29, None),
-                              ('passport_no', 42, None),
-                              ('passport_country', 43, None),
-                              ('passport_expiry', 44, None)),
+                              ('passport_no', 42, 6),
+                              ('passport_country', 43, 8),
+                              ('passport_expiry', 44, 7)),
                              ('15ADDDET',
-                              ('nationality', 6, None),
-                              ('ethnic_origin', 7, None),
-                              ('country_of_birth', 8, None),
-                              ('notice_period', 18, None),
-                              ('religion', 22, None),
-                              ('sexual_orientation', 23, None)),
+                              ('nationality', 6, 33),
+                              ('ethnic_origin', 7, 30),
+                              ('country_of_birth', 8, 31),
+                              ('religion', 22, 32),
+                              ('sexual_orientation', 23, 34)),
                              ('20RELATION',
                               ('rel_surname', 8, None),
                               ('rel_first_forename', 9, None),
@@ -77,7 +76,7 @@ class InterfaceFormatter():
                              ('30BANK',
                               ('pay_method', 7, None)),
                              ('35EMPBASIC',
-                              ('current_start_date', 6, format_date, 2),
+                              ('current_start_date', 6, None),
                               ('current_start_reason', 7, None),
                               ('suspended_indicator', 9, None),
                               ('employee_type', 10, None),
@@ -120,34 +119,36 @@ class InterfaceFormatter():
             position = 2
             for field in record[1:]:
 
-                # Add empty strings to the list until the position is reached.
-                # -1 used as output positions start at 1 not 0 for consistency
-                # with NGA's documentation.
-                while position < field[1] - 1:
-                    line.append('')
-                    position += 1
+                # Ignore fields where the position is set to None (these are
+                # placeholders).
+                if field[2] != None:
 
-                # Duck test for the type of the paramater.
-                # If it's a function, call it with the row and the list of
-                # field positions that hold the data to transform.
-                if callable(field[2]):
-                    line.append(field[2](row, field[3:]))
-                else:
-                    # If it's a string, add the value.
-                    try:
-                        field[2].isupper()
-                        line.append(field[2])
+                    # Add empty strings to the list until the position is
+                    # reached.
+                    # -1 used as output positions start at 1 not 0 for
+                    # consistency with NGA's documentation.
+                    while position < field[1] - 1:
+                        line.append('')
+                        position += 1
 
-                    # If it's not a string or a function it must be a number so
-                    # use this as the position of the value in the input file.
-                    except AttributeError:
+                    # Duck test for the type of the paramater.
+                    # If it's a function, call it with the row and the list of
+                    # field positions that hold the data to transform.
+                    if callable(field[2]):
+                        line.append(field[2](row, field[3:]))
+                    else:
+                        # If it's a string, add the value.
+                        try:
+                            field[2].isupper()
+                            line.append(field[2])
 
-                        # Note: explicitly compares to None so that 0 is a
-                        # valid index.
-                        if field[2] != None:
+                        # If it's not a string or a function it must be a number
+                        # so use this as the position of the value in the input
+                        # file.
+                        except AttributeError:
                             line.append(row[field[2]])
 
-                position += 1
+                    position += 1
 
             # Add the complete line to the return list.
             lines.append(line)
@@ -160,10 +161,16 @@ def format_date(row, position):
     date = row[position[0]]
     return date[:2] + date[3:5] + date[6:]
 
+def get_gender(row, position):
+    title = row[position[0]].lower()
+    if title == 'mr':
+        return 'M'
+    return 'F'
+
+
 if __name__ == '__main__':
-    if len(sys.argv) != 4:
-        sys.stderr.write('Usage: format_file <input_file> <output_file> '
-                         '<log_file>\n')
+    if len(sys.argv) != 3:
+        sys.stderr.write('Usage: format_file <input_file> <output_file>')
         sys.exit(1)
 
     input_file, output_file, log_file = sys.argv[1:]
